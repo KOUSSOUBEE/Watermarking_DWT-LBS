@@ -1,0 +1,36 @@
+%Ce programme permet d'inserer une marque en utilisant le technique 
+% basée sur la technique de l'ondelette dicrète et le LBS
+clc;  clear all;  close all;
+
+%image originale
+A=imread('imag/im1.png'); 
+hote=imresize(A,[256 256]); % Redimensionnée l'image
+
+[h_LL,h_LH,h_HL,h_HH]=dwt2(hote,'haar');
+dec2d = [h_LL,h_LH,h_HL,h_HH]; %decomposition niveau 1 de lena
+ 
+% Marque
+B=imread('imag/cle.png');               
+marque=rgb2gray(B); % Conversion en niveau de gris
+I=imresize(marque,[128 128]); % Redimensionnée la marque
+J=double(I);
+ 
+%Pretraitement de l'image pour LBS
+h_LL1=uint8(h_LL);
+[M,N]=size(h_LL1);
+RedimTatouage=imresize(B, [M,N]);
+RedimTatouageBinaire=im2bw(RedimTatouage); % Conversion de la marque en binaire
+
+h_LLLBS=bitset(h_LL1, 1, RedimTatouageBinaire); %insertion avec le LBS
+h_LLLBS = double(h_LLLBS);
+ImageTatoueeLBS=idwt2(h_LLLBS,h_LH,h_HL,h_HH,'haar');
+ImageTatoueeLBS=uint8(ImageTatoueeLBS);
+figure; 
+subplot(1,2,1);
+imshow(ImageTatoueeLBS);  
+title('Image tatouée avec LBS et DWT');
+
+subplot(1,2,2);
+imshow(hote);  
+title('Image originale');
+
